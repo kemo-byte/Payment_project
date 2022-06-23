@@ -26,10 +26,10 @@ class PaymentController extends Controller
     {
         if( config("paypal.settings.mode") == "live") {
             $this->clientId = config("paypal.live_client_id");
-            $this->secret = config("paypal.live.client_id");
+            $this->secret = config("paypal.live_client_id");
         } else {
-            $this->clientId = config("paypal.sandbox.client_id");
-            $this->secret = config("paypal.sandbox.secret");
+            $this->clientId = config("paypal.sandbox_client_id");
+            $this->secret = config("paypal.sandbox_secret");
         }
 
 
@@ -58,7 +58,7 @@ class PaymentController extends Controller
             ->setPrice($price);
 
         $itemList = new ItemList();
-        $itemList->setItems($item);
+        $itemList->setItems(array($item));
 
         $amount = new Amount();
         $amount->setCurrency("USD")
