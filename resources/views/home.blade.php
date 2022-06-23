@@ -15,6 +15,14 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+
+                    <form action="{{ route('pay') }}" method="post">
+                        @csrf
+                        <input type="hidden" name="name"  value="{{$item['name']}}" class="form-control ">
+                        <input type="hidden" name="price" value="{{$item['price']}}" class="form-control">
+                        <input type="submit" onclick="alert('hello')" value="Buy Now" class="btn btn-success">
+                    
+                    </form>
                 </div>
             </div>
         </div>

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\PaymentController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,3 +22,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::post('pay', [PaymentController::class, 'payWithPaypal'])->name('pay');
+Route::get('canceled', [PaymentController::class, 'canceled'])->name('canceled');
+Route::get('status', [PaymentController::class, 'status'])->name('status');
