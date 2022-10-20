@@ -11,6 +11,7 @@ use PayPal\Api\Item;
 use PayPal\Api\ItemList;
 use PayPal\Api\Payer;
 use PayPal\Api\Payment;
+use PayPal\Api\PaymentExecution;
 use PayPal\Api\RedirectUrls;
 use PayPal\Api\Transaction;
 
@@ -24,7 +25,7 @@ class PaymentController extends Controller
 
     public function __construct()
     {
-        if( config("paypal.settings.mode") == "live") {
+        if (config("paypal.settings.mode") == "live") {
             $this->clientId = config("paypal.live_client_id");
             $this->secret = config("paypal.live_client_id");
         } else {
@@ -33,17 +34,15 @@ class PaymentController extends Controller
         }
 
 
-        $this->apiContext = new ApiContext(new OAuthTokenCredential($this->clientId,$this->secret));
+        $this->apiContext = new ApiContext(new OAuthTokenCredential($this->clientId, $this->secret));
         $this->apiContext->setConfig(config('paypal.settings'));
-
-
     }
 
     public function payWithPaypal(Request $request)
     {
         $name = $request->input('name');
         $price = $request->input('price');
-
+        // return $name . ' costs ' . $price;
         // set payer
 
         $payer = new Payer();
@@ -69,11 +68,17 @@ class PaymentController extends Controller
         $transaction->setAmount($amount)
             ->setItemList($itemList)
             ->setDescription("Buying From Kemobyte Shop");
-    
-        
+
+
         $redirectUrls = new RedirectUrls();
-        $redirectUrls->setReturnUrl("http://localhost:8000/done")
+        $redirectUrls->setReturnUrl("http://localhost:8000/status")
             ->setCancelUrl("http://localhost:8000/canceled");
+
+        $payment = new Payment();
+        $payment->setIntent("sale")
+            ->setPayer($payer)
+            ->setRedirectUrls($redirectUrls)
+            ->setTransactions(array($transaction));
 
         $payment = new Payment();
         $payment->setIntent("sale")
@@ -91,12 +96,27 @@ class PaymentController extends Controller
 
         return redirect($approvalUrl);
     }
-        public function status()
-        {
-            
+    public function status(Request $request)
+    {
+        if (empty($request->input('PayerID')) || empty($request->input('token'))) {
+            die('Payment Failed');
         }
-        public function canceled()
-        {
-            return 'payment canceled';
+
+        $paymentid = $request->get('paymentId');
+        $payment = Payment::get($paymentid, $this->apiContext);
+        $execution = new PaymentExecution();
+        $execution->setPayerid($request->input('PayerID'));
+        $result = $payment->execute($execution, $this->apiContext);
+
+        if ($result->getState() == 'approved') {
+            return 'Thank you . Payment Completed Successfully !';
         }
+
+        echo "Payment Failed";
+        die($result);
+    }
+    public function canceled()
+    {
+        return 'payment canceled';
+    }
 }

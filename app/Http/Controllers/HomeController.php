@@ -23,7 +23,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $item = ['name'=>'fan','price'=>15];
-        return view('home',['item' => $item]);
+        $item = ['name' => 'fan', 'price' => 15];
+        return view('home', ['item' => $item]);
     }
 }
